@@ -291,6 +291,28 @@ public class NOcrChar
 
     public static void GenerateLineSegments(int maxNumberOfLines, bool veryPrecise, NOcrChar nOcrChar, NikseBitmap2 bitmap)
     {
+        GenerateLineSegments(maxNumberOfLines, veryPrecise, nOcrChar, bitmap, NOcrLineAlgorithm.Random);
+    }
+
+    public static void GenerateLineSegments(int maxNumberOfLines, bool veryPrecise, NOcrChar nOcrChar, NikseBitmap2 bitmap, NOcrLineAlgorithm algorithm)
+    {
+        switch (algorithm)
+        {
+            case NOcrLineAlgorithm.SkeletonDistance:
+                NOcrLineGenerator.GenerateSkeletonDistance(maxNumberOfLines, veryPrecise, nOcrChar, bitmap);
+                break;
+            case NOcrLineAlgorithm.EdgeHough:
+                NOcrLineGenerator.GenerateEdgeHough(maxNumberOfLines, veryPrecise, nOcrChar, bitmap);
+                break;
+            case NOcrLineAlgorithm.Random:
+            default:
+                GenerateLineSegmentsRandom(maxNumberOfLines, veryPrecise, nOcrChar, bitmap);
+                break;
+        }
+    }
+
+    internal static void GenerateLineSegmentsRandom(int maxNumberOfLines, bool veryPrecise, NOcrChar nOcrChar, NikseBitmap2 bitmap)
+    {
         const int giveUpCount = 15_000;
         var r = new Random();
 
@@ -453,7 +475,7 @@ public class NOcrChar
         }
     }
 
-    private static bool IsMatchPointForeGround(NOcrLine op, bool loose, NikseBitmap2 nbmp, NOcrChar nOcrChar)
+    internal static bool IsMatchPointForeGround(NOcrLine op, bool loose, NikseBitmap2 nbmp, NOcrChar nOcrChar)
     {
         if (Math.Abs(op.Start.X - op.End.X) < 2 && Math.Abs(op.End.Y - op.Start.Y) < 2)
         {
@@ -529,7 +551,7 @@ public class NOcrChar
         return true;
     }
 
-    private static bool IsMatchPointBackGround(NOcrLine op, bool loose, NikseBitmap2 nbmp, NOcrChar nOcrChar)
+    internal static bool IsMatchPointBackGround(NOcrLine op, bool loose, NikseBitmap2 nbmp, NOcrChar nOcrChar)
     {
         foreach (var point in op.ScaledGetPoints(nOcrChar, nbmp.Width, nbmp.Height))
         {
@@ -584,7 +606,7 @@ public class NOcrChar
         return true;
     }
 
-    private static void RemoveDuplicates(List<NOcrLine> lines)
+    internal static void RemoveDuplicates(List<NOcrLine> lines)
     {
         var indicesToDelete = new List<int>();
         for (var index = 0; index < lines.Count; index++)

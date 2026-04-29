@@ -46,6 +46,9 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
     [ObservableProperty] private bool _isInspectAdditionsVisible;
     [ObservableProperty] private ObservableCollection<int> _noOfLinesToAutoDrawList;
     [ObservableProperty] private int _selectedNoOfLinesToAutoDraw;
+    [ObservableProperty] private ObservableCollection<NOcrLineAlgorithmItem> _lineAlgorithms;
+    [ObservableProperty] private NOcrLineAlgorithmItem _selectedLineAlgorithm;
+    [ObservableProperty] private string _linesGeneratedInfo;
     [ObservableProperty] private Bitmap _sentenceBitmap;
     [ObservableProperty] private Bitmap _currentBitmap;
 
@@ -92,6 +95,9 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         }
 
         SelectedNoOfLinesToAutoDraw = 100;
+        LineAlgorithms = new ObservableCollection<NOcrLineAlgorithmItem>(NOcrLineAlgorithmItem.Items);
+        SelectedLineAlgorithm = LineAlgorithms[0];
+        LinesGeneratedInfo = string.Empty;
         NOcrChar = new NOcrChar();
         _nOcrDb = new NOcrDb(string.Empty);
         SentenceBitmap = new SKBitmap(1, 1, true).ToAvaloniaBitmap();
@@ -113,6 +119,19 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         IsNewTextItalic = Se.Settings.Ocr.IsNewLetterItalic;
         SubmitOnFirstLetter = Se.Settings.Ocr.SubmitOnFirstLetter;
         SelectedNoOfLinesToAutoDraw = Se.Settings.Ocr.NOcrNoOfLinesToAutoDraw;
+
+        var savedAlgo = Se.Settings.Ocr.NOcrLineAlgorithm;
+        if (!string.IsNullOrEmpty(savedAlgo) && Enum.TryParse<NOcrLineAlgorithm>(savedAlgo, out var algoEnum))
+        {
+            foreach (var item in LineAlgorithms)
+            {
+                if (item.Value == algoEnum)
+                {
+                    SelectedLineAlgorithm = item;
+                    break;
+                }
+            }
+        }
     }
 
     private void SaveSettings()
@@ -120,6 +139,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         Se.Settings.Ocr.IsNewLetterItalic = IsNewTextItalic;
         Se.Settings.Ocr.SubmitOnFirstLetter = SubmitOnFirstLetter;
         Se.Settings.Ocr.NOcrNoOfLinesToAutoDraw = SelectedNoOfLinesToAutoDraw;
+        Se.Settings.Ocr.NOcrLineAlgorithm = SelectedLineAlgorithm.Value.ToString();
         Se.SaveSettings();
     }
 
@@ -348,11 +368,29 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
         NOcrChar.LinesBackground.Clear();
         if (PreviewBitmap == null)
         {
+            LinesGeneratedInfo = string.Empty;
             return;
         }
 
-        NOcrChar.GenerateLineSegments(SelectedNoOfLinesToAutoDraw, false, NOcrChar, PreviewBitmap);
+        NOcrChar.GenerateLineSegments(SelectedNoOfLinesToAutoDraw, false, NOcrChar, PreviewBitmap, SelectedLineAlgorithm.Value);
+        UpdateLinesGeneratedInfo();
         ShowOcrPoints();
+    }
+
+    private void UpdateLinesGeneratedInfo()
+    {
+        LinesGeneratedInfo = $"Generated: {NOcrChar.LinesForeground.Count} foreground, {NOcrChar.LinesBackground.Count} background";
+    }
+
+    partial void OnSelectedLineAlgorithmChanged(NOcrLineAlgorithmItem value)
+    {
+        // Skip the constructor/LoadSettings firings - DrawAgain returns early on null
+        // PreviewBitmap anyway, but this avoids a flicker through the empty-info path.
+        if (PreviewBitmap == null)
+        {
+            return;
+        }
+        DrawAgain();
     }
 
     [RelayCommand]
@@ -435,6 +473,7 @@ public partial class NOcrCharacterAddViewModel : ObservableObject
 
         NOcrDrawingCanvas.MissPaths.AddRange(NOcrChar.LinesBackground);
         NOcrDrawingCanvas.HitPaths.AddRange(NOcrChar.LinesForeground);
+        UpdateLinesGeneratedInfo();
         NOcrDrawingCanvas.InvalidateVisual();
     }
 
