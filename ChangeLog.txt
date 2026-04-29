@@ -2,7 +2,7 @@
 Subtitle Edit Changelog
 
 
-v5.0.0-beta20 (xth April 2026)
+v5.0.0-beta20 (29th April 2026)
 
 * Add menu toggle for waveform toolbar - thx Ironship
 * Add auto-language for CrispASR glm/parakeet/Qwen3
