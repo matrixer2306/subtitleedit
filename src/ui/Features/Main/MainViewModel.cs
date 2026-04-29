@@ -14125,13 +14125,24 @@ public partial class MainViewModel :
     private bool _subtitleGridIsLeftClick = false;
     private bool _subtitleGridIsControlPressed = false;
     private int _dragSelectStartIndex = -1;
+    private int _dragSelectLastIndex = -1;
+    private int _dragSelectAutoScrollDirection;
+    private int _dragSelectAutoScrollStep = 1;
+    private bool _dragSelectHasMoved;
+    private DispatcherTimer? _dragSelectAutoScrollTimer;
+    private const double DragSelectAutoScrollEdgeSize = 28;
+    private const double DragSelectAutoScrollAccelerationPixels = 18;
+    private const int DragSelectAutoScrollMaxStep = 16;
 
     public void SubtitleGrid_PointerPressed(object? sender, PointerPressedEventArgs e)
     {
+        StopSubtitleGridDragSelectAutoScroll();
         _subtitleGridIsControlPressed = false;
         _subtitleGridIsLeftClick = false;
         _subtitleGridIsRightClick = false;
         _dragSelectStartIndex = -1;
+        _dragSelectLastIndex = -1;
+        _dragSelectHasMoved = false;
         IsSubtitleGridFlyoutHeaderVisible = false;
 
         if (sender is Control { ContextFlyout: not null } control)
@@ -14161,6 +14172,8 @@ public partial class MainViewModel :
                 if (rowIndex >= 0)
                 {
                     _dragSelectStartIndex = rowIndex;
+                    _dragSelectLastIndex = rowIndex;
+                    e.Pointer.Capture(control);
                 }
             }
         }
@@ -14193,15 +14206,38 @@ public partial class MainViewModel :
         var props = e.GetCurrentPoint(SubtitleGrid).Properties;
         if (!props.IsLeftButtonPressed)
         {
-            _dragSelectStartIndex = -1;
+            EndSubtitleGridDragSelect(e);
             return;
         }
 
-        var currentIndex = GetDataGridRowIndexFromPoint(e.GetPosition(SubtitleGrid));
-        if (currentIndex < 0 || currentIndex == _dragSelectStartIndex)
+        var position = e.GetPosition(SubtitleGrid);
+        UpdateSubtitleGridDragSelectAutoScroll(position);
+
+        var currentIndex = GetDataGridRowIndexFromPoint(position);
+        if (currentIndex < 0)
         {
             return;
         }
+
+        DragSelectSubtitleGridToIndex(currentIndex);
+        e.Handled = _dragSelectHasMoved;
+    }
+
+    private void DragSelectSubtitleGridToIndex(int currentIndex)
+    {
+        if (_dragSelectStartIndex < 0 || currentIndex < 0 || currentIndex >= Subtitles.Count)
+        {
+            return;
+        }
+
+        _dragSelectLastIndex = currentIndex;
+
+        if (currentIndex == _dragSelectStartIndex && !_dragSelectHasMoved)
+        {
+            return;
+        }
+
+        _dragSelectHasMoved = true;
 
         var startIdx = Math.Min(_dragSelectStartIndex, currentIndex);
         var endIdx = Math.Max(_dragSelectStartIndex, currentIndex);
@@ -14221,26 +14257,122 @@ public partial class MainViewModel :
         SubtitleGridSelectionChanged();
     }
 
+    private void UpdateSubtitleGridDragSelectAutoScroll(Avalonia.Point position)
+    {
+        if (SubtitleGrid.Bounds.Height <= 0)
+        {
+            StopSubtitleGridDragSelectAutoScroll();
+            return;
+        }
+
+        if (position.Y < DragSelectAutoScrollEdgeSize)
+        {
+            var distanceFromEdge = DragSelectAutoScrollEdgeSize - position.Y;
+            StartSubtitleGridDragSelectAutoScroll(-1, distanceFromEdge);
+        }
+        else if (position.Y > SubtitleGrid.Bounds.Height - DragSelectAutoScrollEdgeSize)
+        {
+            var distanceFromEdge = position.Y - (SubtitleGrid.Bounds.Height - DragSelectAutoScrollEdgeSize);
+            StartSubtitleGridDragSelectAutoScroll(1, distanceFromEdge);
+        }
+        else
+        {
+            StopSubtitleGridDragSelectAutoScroll();
+        }
+    }
+
+    private void StartSubtitleGridDragSelectAutoScroll(int direction, double distanceFromEdge)
+    {
+        if (_dragSelectLastIndex < 0 || Subtitles.Count == 0)
+        {
+            return;
+        }
+
+        _dragSelectAutoScrollDirection = direction;
+        _dragSelectAutoScrollStep = CalculateSubtitleGridDragSelectAutoScrollStep(distanceFromEdge);
+
+        if (_dragSelectAutoScrollTimer != null)
+        {
+            if (!_dragSelectAutoScrollTimer.IsEnabled)
+            {
+                _dragSelectAutoScrollTimer.Start();
+            }
+
+            return;
+        }
+
+        _dragSelectAutoScrollTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(80),
+        };
+        _dragSelectAutoScrollTimer.Tick += (_, _) => SubtitleGridDragSelectAutoScrollTick();
+        _dragSelectAutoScrollTimer.Start();
+    }
+
+    private static int CalculateSubtitleGridDragSelectAutoScrollStep(double distanceFromEdge)
+    {
+        var step = 1 + (int)Math.Floor(Math.Max(0, distanceFromEdge) / DragSelectAutoScrollAccelerationPixels);
+        return Math.Clamp(step, 1, DragSelectAutoScrollMaxStep);
+    }
+
+    private void StopSubtitleGridDragSelectAutoScroll()
+    {
+        _dragSelectAutoScrollDirection = 0;
+        _dragSelectAutoScrollStep = 1;
+        _dragSelectAutoScrollTimer?.Stop();
+    }
+
+    private void SubtitleGridDragSelectAutoScrollTick()
+    {
+        if (_dragSelectStartIndex < 0 || !_subtitleGridIsLeftClick || _dragSelectAutoScrollDirection == 0)
+        {
+            StopSubtitleGridDragSelectAutoScroll();
+            return;
+        }
+
+        var nextIndex = Math.Clamp(
+            _dragSelectLastIndex + _dragSelectAutoScrollDirection * _dragSelectAutoScrollStep,
+            0,
+            Subtitles.Count - 1);
+        if (nextIndex == _dragSelectLastIndex)
+        {
+            StopSubtitleGridDragSelectAutoScroll();
+            return;
+        }
+
+        DragSelectSubtitleGridToIndex(nextIndex);
+        SubtitleGrid.ScrollIntoView(Subtitles[nextIndex], null);
+    }
+
     public void SubtitleGrid_PointerReleased(object? sender, PointerReleasedEventArgs e)
     {
-        _dragSelectStartIndex = -1;
+        EndSubtitleGridDragSelect(e);
 
         if (sender is Control { ContextFlyout: MenuFlyout menuFlyout } control)
         {
-            if (_subtitleGridIsRightClick)
+            if (_subtitleGridIsRightClick && !_dragSelectHasMoved)
             {
                 menuFlyout.ShowAt(control, true);
             }
 
             if (OperatingSystem.IsMacOS())
             {
-                if (_subtitleGridIsLeftClick && _subtitleGridIsControlPressed)
+                if (_subtitleGridIsLeftClick && _subtitleGridIsControlPressed && !_dragSelectHasMoved)
                 {
                     menuFlyout.ShowAt(control, true);
                     e.Handled = true;
                 }
             }
         }
+    }
+
+    private void EndSubtitleGridDragSelect(PointerEventArgs e)
+    {
+        StopSubtitleGridDragSelectAutoScroll();
+        e.Pointer.Capture(null);
+        _dragSelectStartIndex = -1;
+        _dragSelectLastIndex = -1;
+        _dragSelectAutoScrollDirection = 0;
     }
 
     public void SubtitleGrid_SelectionChanged(object? sender, SelectionChangedEventArgs e)

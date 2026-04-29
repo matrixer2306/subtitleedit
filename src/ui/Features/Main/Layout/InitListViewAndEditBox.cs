@@ -478,7 +478,6 @@ public static partial class InitListViewAndEditBox
         var flyout = new MenuFlyout();
 
         flyout.Opening += vm.SubtitleContextOpening;
-        dropHost.PointerPressed += vm.SubtitleGrid_PointerPressed;
 
         var assaStylesMenuItem = new MenuItem
         {
@@ -943,9 +942,9 @@ public static partial class InitListViewAndEditBox
 
         // Set the ContextFlyout on the drop host so right-clicks on empty space also show the menu
         dropHost.ContextFlyout = flyout;
-        dropHost.AddHandler(InputElement.PointerPressedEvent, vm.SubtitleGrid_PointerPressed, RoutingStrategies.Tunnel);
-        dropHost.AddHandler(InputElement.PointerReleasedEvent, vm.SubtitleGrid_PointerReleased, RoutingStrategies.Tunnel);
-        dropHost.AddHandler(InputElement.PointerMovedEvent, vm.SubtitleGrid_PointerMoved, RoutingStrategies.Tunnel);
+        dropHost.AddHandler(InputElement.PointerPressedEvent, vm.SubtitleGrid_PointerPressed, RoutingStrategies.Tunnel, handledEventsToo: true);
+        dropHost.AddHandler(InputElement.PointerReleasedEvent, vm.SubtitleGrid_PointerReleased, RoutingStrategies.Tunnel, handledEventsToo: true);
+        dropHost.AddHandler(InputElement.PointerMovedEvent, vm.SubtitleGrid_PointerMoved, RoutingStrategies.Tunnel, handledEventsToo: true);
 
         // Edit area - restructured with time controls on left, multiline text on right
         var editGrid = new Grid
