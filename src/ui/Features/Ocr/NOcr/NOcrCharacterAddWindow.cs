@@ -104,6 +104,7 @@ public class NOcrCharacterAddWindow : Window
         };
 
         vm.TextBoxNew = UiUtil.MakeTextBox(100, vm, nameof(vm.NewText));
+        vm.TextBoxNew.FontStyle = vm.IsNewTextItalic ? FontStyle.Italic : FontStyle.Normal;
         var image = new Image
         {
             Margin = new Thickness(5),
