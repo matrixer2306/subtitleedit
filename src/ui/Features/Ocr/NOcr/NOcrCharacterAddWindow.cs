@@ -105,6 +105,7 @@ public class NOcrCharacterAddWindow : Window
 
         vm.TextBoxNew = UiUtil.MakeTextBox(100, vm, nameof(vm.NewText));
         vm.TextBoxNew.FontStyle = vm.IsNewTextItalic ? FontStyle.Italic : FontStyle.Normal;
+
         var image = new Image
         {
             Margin = new Thickness(5),
@@ -126,7 +127,24 @@ public class NOcrCharacterAddWindow : Window
         };
 
         var checkBoxItalic = UiUtil.MakeCheckBox(Se.Language.General.Italic, vm, nameof(vm.IsNewTextItalic));
+        var italicActiveBrush = new SolidColorBrush(Colors.Orange);
+        void UpdateItalicLabel()
+        {
+            var isItalic = checkBoxItalic.IsChecked == true;
+            checkBoxItalic.FontStyle = isItalic ? FontStyle.Italic : FontStyle.Normal;
+            checkBoxItalic.FontWeight = isItalic ? FontWeight.Bold : FontWeight.Normal;
+            if (isItalic)
+            {
+                checkBoxItalic.Foreground = italicActiveBrush;
+            }
+            else
+            {
+                checkBoxItalic.ClearValue(TemplatedControl.ForegroundProperty);
+            }
+        }
+        UpdateItalicLabel();
         checkBoxItalic.IsCheckedChanged += vm.ItalicCheckChanged;
+        checkBoxItalic.IsCheckedChanged += (_, _) => UpdateItalicLabel();
 
         var checkBoAutoSubmitFirsChar = UiUtil.MakeCheckBox(Se.Language.Ocr.AutoSubmitFirstCharacter, vm, nameof(vm.SubmitOnFirstLetter));
 
