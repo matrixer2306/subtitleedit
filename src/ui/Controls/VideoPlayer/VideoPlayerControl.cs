@@ -136,6 +136,8 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
 
         private bool _isFullScreen = false;
 
+        public event Action<bool>? IsFullScreenChanged;
+
         public bool IsFullScreen
         {
             get => _isFullScreen;
@@ -155,6 +157,8 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
                     StopAutoHideControls();
                     ShowControls();
                 }
+
+                IsFullScreenChanged?.Invoke(value);
             }
         }
 
