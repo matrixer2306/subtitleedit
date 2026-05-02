@@ -687,6 +687,10 @@ public partial class OcrViewModel : ObservableObject
                 item.EndTime.TotalMilliseconds));
         }
 
+        // SubRip.ToText writes p.Number verbatim, and the Paragraph constructor leaves it at 0
+        // (so without this every line was numbered "0").
+        subtitle.Renumber();
+
         try
         {
             var targetFormat = saveAsResult.SubtitleFormat ?? format;
