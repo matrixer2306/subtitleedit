@@ -82,11 +82,14 @@ public class NOcrDb
                 buffer = stream.ToArray();
             }
 
-            var position = 2;
+            var versionBuffer = Encoding.ASCII.GetBytes(Version);
+            var isVersion2 = buffer.Length >= versionBuffer.Length &&
+                             buffer.AsSpan(0, versionBuffer.Length).SequenceEqual(versionBuffer);
+            var position = isVersion2 ? versionBuffer.Length : 0;
             var done = false;
             while (!done)
             {
-                var ocrChar = new NOcrChar(ref position, buffer);
+                var ocrChar = new NOcrChar(ref position, buffer, isVersion2);
                 if (ocrChar.LoadedOk)
                 {
                     if (ocrChar.ExpandCount > 0)

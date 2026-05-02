@@ -56,6 +56,11 @@ public class NOcrChar
     public bool IsSensitive => Text is "O" or "o" or "0" or "'" or "-" or ":" or "\"";
 
     public NOcrChar(ref int position, byte[] file)
+        : this(ref position, file, true)
+    {
+    }
+
+    public NOcrChar(ref int position, byte[] file, bool isVersion2)
     {
         Text = string.Empty;
         LinesForeground = new List<NOcrLine>();
@@ -63,50 +68,72 @@ public class NOcrChar
 
         try
         {
-            var buffer = new byte[4];
-            if (position + buffer.Length >= file.Length)
+            if (isVersion2)
             {
-                LoadedOk = false;
-                return;
-            }
+                if (position + 4 >= file.Length)
+                {
+                    LoadedOk = false;
+                    return;
+                }
 
-            var isShort = (file[position] & 0b0001_0000) > 0;
-            Italic = (file[position] & 0b0010_0000) > 0;
+                var isShort = (file[position] & 0b0001_0000) > 0;
+                Italic = (file[position] & 0b0010_0000) > 0;
 
-            if (isShort)
-            {
-                ExpandCount = file[position++] & 0b0000_1111;
-                Width = file[position++];
-                Height = file[position++];
-                MarginTop = file[position++];
+                if (isShort)
+                {
+                    ExpandCount = file[position++] & 0b0000_1111;
+                    Width = file[position++];
+                    Height = file[position++];
+                    MarginTop = file[position++];
+                }
+                else
+                {
+                    position++;
+                    ExpandCount = file[position++];
+                    Width = file[position++] << 8 | file[position++];
+                    Height = file[position++] << 8 | file[position++];
+                    MarginTop = file[position++] << 8 | file[position++];
+                }
+
+                var textLen = file[position++];
+                if (textLen > 0)
+                {
+                    Text = System.Text.Encoding.UTF8.GetString(file, position, textLen);
+                    position += textLen;
+                }
+
+                if (isShort)
+                {
+                    LinesForeground = ReadPointsBytes(ref position, file);
+                    LinesBackground = ReadPointsBytes(ref position, file);
+                }
+                else
+                {
+                    LinesForeground = ReadPoints(ref position, file);
+                    LinesBackground = ReadPoints(ref position, file);
+                }
             }
             else
             {
-                position++;
-                ExpandCount = file[position++];
+                if (position + 9 > file.Length)
+                {
+                    LoadedOk = false;
+                    return;
+                }
+
                 Width = file[position++] << 8 | file[position++];
                 Height = file[position++] << 8 | file[position++];
                 MarginTop = file[position++] << 8 | file[position++];
-            }
+                Italic = file[position++] != 0;
+                ExpandCount = file[position++];
 
-            var textLen = file[position++];
-            if (textLen > 0)
-            {
-                Text = System.Text.Encoding.UTF8.GetString(file, position, textLen);
-                position += textLen;
-            }
-            else
-            {
-                Text = string.Empty;
-            }
+                var textLen = file[position++];
+                if (textLen > 0)
+                {
+                    Text = System.Text.Encoding.UTF8.GetString(file, position, textLen);
+                    position += textLen;
+                }
 
-            if (isShort)
-            {
-                LinesForeground = ReadPointsBytes(ref position, file);
-                LinesBackground = ReadPointsBytes(ref position, file);
-            }
-            else
-            {
                 LinesForeground = ReadPoints(ref position, file);
                 LinesBackground = ReadPoints(ref position, file);
             }
