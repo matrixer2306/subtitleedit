@@ -14,6 +14,9 @@ v5.0.0-beta21 (xth May 2026)
 * Testing different nOCR drawing algorithms
 * Minor improvements to speech-to-text with 1 file + improve video file check when opening subtitles
 * Minor UI fixes/improvements for OCR in batch convert
+* Fix for click on video player (regression) - thx JDJD777
+* Fix ASSA toolbar not visible when default format is ASSA - thx farisruhi 
+* Add Bulgarian translation - thx jekovcar
 
 -----------------------------------------------------------------------------------------------------
 
