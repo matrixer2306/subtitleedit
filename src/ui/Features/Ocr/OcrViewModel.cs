@@ -1358,20 +1358,75 @@ public partial class OcrViewModel : ObservableObject
         OkPressed = true;
 
         OcredSubtitle.Clear();
+        var number = 1;
         for (var i = 0; i < OcrSubtitleItems.Count; i++)
         {
             var item = OcrSubtitleItems[i];
-            var subtitleLine = new SubtitleLineViewModel
+            foreach (var groupText in SplitTextByAlignmentGroups(item.Text))
             {
-                Number = i + 1,
-                Text = item.Text,
-                StartTime = item.StartTime,
-                EndTime = item.EndTime,
-            };
-            OcredSubtitle.Add(subtitleLine);
+                OcredSubtitle.Add(new SubtitleLineViewModel
+                {
+                    Number = number++,
+                    Text = groupText,
+                    StartTime = item.StartTime,
+                    EndTime = item.EndTime,
+                });
+            }
         }
 
         Close();
+    }
+
+    private static readonly Regex AlignmentTagRegex = new(@"^\{\\an[1-9]\}", RegexOptions.Compiled);
+
+    // Splits text into groups of lines sharing the same leading {\anN} alignment tag.
+    // A line without a tag continues the current group. Returns the original text as a single
+    // group when fewer than two distinct alignments are present.
+    private static List<string> SplitTextByAlignmentGroups(string text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return new List<string> { text };
+        }
+
+        var lines = text.SplitToLines();
+        var groups = new List<List<string>>();
+        var currentTag = string.Empty;
+        var currentLines = new List<string>();
+
+        foreach (var line in lines)
+        {
+            var match = AlignmentTagRegex.Match(line);
+            var tag = match.Success ? match.Value : string.Empty;
+
+            if (currentLines.Count == 0)
+            {
+                currentTag = tag;
+                currentLines.Add(line);
+            }
+            else if (tag.Length > 0 && tag != currentTag)
+            {
+                groups.Add(currentLines);
+                currentTag = tag;
+                currentLines = new List<string> { line };
+            }
+            else
+            {
+                currentLines.Add(line);
+            }
+        }
+
+        if (currentLines.Count > 0)
+        {
+            groups.Add(currentLines);
+        }
+
+        if (groups.Count <= 1)
+        {
+            return new List<string> { text };
+        }
+
+        return groups.Select(g => string.Join("\n", g)).ToList();
     }
 
     [RelayCommand]
