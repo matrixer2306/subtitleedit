@@ -22,7 +22,7 @@ on:
         default: true
         type: boolean
       release_tag:
-        description: 'Release tag (e.g., v5.0.0-beta21). "-seconv" is inserted automatically -> v5.0.0-seconv-beta21'
+        description: 'Release tag (e.g., v5.0.0-beta21). Seconv assets are uploaded to the existing release for this tag (created by build-ui.yml). If the release does not exist yet, it is created.'
         required: false
         default: ''
         type: string
@@ -263,27 +263,10 @@ jobs:
         id: tag
         run: |
           if [ -n "${{ inputs.release_tag }}" ]; then
-            raw="$(echo '${{ inputs.release_tag }}' | xargs)"
-            case "$raw" in
-              *seconv*)
-                # Already namespaced — use as-is
-                tag="$raw"
-                ;;
-              *-*)
-                # Insert "-seconv" after the numeric version: v5.0.0-beta21 -> v5.0.0-seconv-beta21
-                base="${raw%%-*}"
-                suffix="${raw#*-}"
-                tag="${base}-seconv-${suffix}"
-                ;;
-              *)
-                # No suffix — just append: v5.0.0 -> v5.0.0-seconv
-                tag="${raw}-seconv"
-                ;;
-            esac
-            echo "tag=${tag}" >> $GITHUB_OUTPUT
+            echo "tag=$(echo '${{ inputs.release_tag }}' | xargs)" >> $GITHUB_OUTPUT
           else
             timestamp=$(date +"%Y%m%d-%H%M%S")
-            echo "tag=seconv-pre-release-${timestamp}" >> $GITHUB_OUTPUT
+            echo "tag=pre-release-${timestamp}" >> $GITHUB_OUTPUT
           fi
 
       - name: Download all artifacts
@@ -304,36 +287,19 @@ jobs:
           echo "Release assets:"
           ls -la ./release-assets/
 
-      - name: Get current date
-        id: date
-        run: echo "date=$(date +'%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_OUTPUT
-
-      - name: Create Release
+      # Upload seconv assets to the release for this tag.
+      # If the release already exists (created by build-ui.yml), assets are added without
+      # overwriting the existing name/body — we deliberately omit `name:` and `body:` so the
+      # action falls back to the existing release values. If the release does not exist yet,
+      # one is created (with no body) so the seconv assets have somewhere to live; the
+      # build-ui.yml run will then fill in the name and body when it runs against the same tag.
+      - name: Upload seconv assets to release
         uses: softprops/action-gh-release@v2
         id: create_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.tag.outputs.tag }}
-          name: SeConv ${{ steps.tag.outputs.tag }}
-          body: |
-            **Build Configuration:** ${{ inputs.build_configuration }}
-            **Build Date:** ${{ steps.date.outputs.date }}
-
-            ### Downloads
-            - **Windows x64:** [SeConv-Windows-x64.zip](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/SeConv-Windows-x64.zip)
-            - **Windows ARM64:** [SeConv-Windows-ARM64.zip](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/SeConv-Windows-ARM64.zip)
-            - **macOS ARM64 (Apple Silicon):** [SeConv-macOS-ARM64.zip](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/SeConv-macOS-ARM64.zip)
-            - **macOS x64 (Intel):** [SeConv-macOS-x64.zip](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/SeConv-macOS-x64.zip)
-            - **Linux x64:** [SeConv-Linux-x64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/SeConv-Linux-x64.tar.gz)
-            - **Linux ARM64:** [SeConv-Linux-ARM64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/SeConv-Linux-ARM64.tar.gz)
-
-            ### Installation
-            1. Download the appropriate package for your platform
-            2. Extract the archive
-            3. Run the `seconv` executable (may need execute permissions on Unix systems: `chmod +x seconv`)
-
-            *This is an automated build from the GitHub Actions workflow.*
           draft: false
           prerelease: ${{ inputs.is_prerelease }}
           files: |
