@@ -312,6 +312,14 @@ public partial class BatchConvertViewModel : ObservableObject
         AlignmentTagOptions = new ObservableCollection<DisplayAlignment>(DisplayAlignment.GetAll());
         SelectedAlignmentTagOption = AlignmentTagOptions[1];
 
+        SortByOptions = new ObservableCollection<SortByOption>
+        {
+            new("Number", Se.Language.Tools.SortBy.SortByNumber),
+            new("StartTime", Se.Language.Tools.SortBy.SortByStartTime),
+            new("EndTime", Se.Language.Tools.SortBy.SortByEndTime),
+        };
+        SelectedSortByOption = SortByOptions[0];
+
         BatchFunctions = new ObservableCollection<BatchConvertFunction>(BatchConvertFunction.List(this));
 
         _cancellationTokenSource = new CancellationTokenSource();
@@ -345,14 +353,6 @@ public partial class BatchConvertViewModel : ObservableObject
         AssaChangeResolutionChangeFontSize = true;
         AssaChangeResolutionChangePosition = true;
         AssaChangeResolutionChangeDrawing = true;
-
-        SortByOptions = new ObservableCollection<SortByOption>
-        {
-            new("Number", Se.Language.Tools.SortBy.SortByNumber),
-            new("StartTime", Se.Language.Tools.SortBy.SortByStartTime),
-            new("EndTime", Se.Language.Tools.SortBy.SortByEndTime),
-        };
-        SelectedSortByOption = SortByOptions[0];
 
         FixCommonErrorsProfile = LoadDefaultProfile();
 
