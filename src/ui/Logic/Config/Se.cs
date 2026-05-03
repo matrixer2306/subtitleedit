@@ -184,7 +184,7 @@ public class Se
         return Path.Combine(TesseractFolder, "tessdata");
     }
 
-    public static string Version { get; set; } = "v5.0.0-beta20";
+    public static string Version { get; set; } = "v5.0.0-beta21";
 
     public void InitializeMainShortcuts(MainViewModel vm)
     {

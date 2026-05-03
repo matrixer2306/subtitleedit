@@ -2,7 +2,7 @@
 Subtitle Edit Changelog
 
 
-v5.0.0-beta21 (xth May 2026)
+v5.0.0-beta21 (3rd May 2026)
 
 * Update Simplified Chinese localization - thx Monstercate
 * Try to improve vulkan loading for Qwen3TTS/Vulkan
