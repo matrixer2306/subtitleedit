@@ -90,12 +90,13 @@ public sealed class UndoRedoManager : IUndoRedoManager
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        if (_changeDetectionTimer is null)
-            throw new InvalidOperationException(
-                "Call SetupChangeDetection() before StartChangeDetection().");
-
-        if (!_isChangeDetectionActive)
+        lock (_lock)
         {
+            if (_changeDetectionTimer is null)
+                throw new InvalidOperationException(
+                    "Call SetupChangeDetection() before StartChangeDetection().");
+
+            if (_isChangeDetectionActive) return;
             _isChangeDetectionActive = true;
             _changeDetectionTimer.Change(_detectionInterval, _detectionInterval);
         }
@@ -103,8 +104,9 @@ public sealed class UndoRedoManager : IUndoRedoManager
 
     public void StopChangeDetection()
     {
-        if (_isChangeDetectionActive)
+        lock (_lock)
         {
+            if (!_isChangeDetectionActive) return;
             _isChangeDetectionActive = false;
             _changeDetectionTimer?.Change(
                 Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
@@ -138,21 +140,18 @@ public sealed class UndoRedoManager : IUndoRedoManager
 
             var currentHash = _undoRedoClient?.GetFastHash() ?? 0;
 
-            // Top of stack matches live state — save it to redo and go deeper.
             if (_undoList.Last().Hash == currentHash)
             {
+                // Top of stack is the live state — pop it onto redo so we can
+                // come back, and step back to the state beneath.
                 if (_undoList.Count == 1) return null;
-
                 PushIfNew(_redoList, PopLast(_undoList));
             }
+            // If top doesn't match, the live state is an unrecorded change.
+            // We can't snapshot it here, so just step back to the last
+            // recorded state without touching redo.
 
-            // Always keep at least one item in the undo stack (baseline state).
-            var target = _undoList.Last();
-            if (_undoList.Count > 1)
-                _undoList.RemoveAt(_undoList.Count - 1);
-
-            PushIfNew(_redoList, target);
-            return UndoRedoItem.Clone(target);
+            return UndoRedoItem.Clone(_undoList.Last());
         }
     }
 
@@ -161,15 +160,6 @@ public sealed class UndoRedoManager : IUndoRedoManager
         lock (_lock)
         {
             if (_redoList.Count == 0) return null;
-
-            var currentHash = _undoRedoClient?.GetFastHash() ?? 0;
-
-            // Skip an entry that already matches the current live state.
-            if (_redoList.Last().Hash == currentHash)
-            {
-                if (_redoList.Count == 1) return null;
-                _redoList.RemoveAt(_redoList.Count - 1);
-            }
 
             var item = PopLast(_redoList);
 
@@ -325,17 +315,21 @@ public sealed class UndoRedoManager : IUndoRedoManager
 
     public void Reset()
     {
-        // Stop *outside* the lock — StopChangeDetection touches volatile fields
-        // and the timer only; no _lock needed, and calling it inside would deadlock.
-        StopChangeDetection();
-
+        bool wasActive;
         lock (_lock)
         {
+            wasActive = _isChangeDetectionActive;
+            if (wasActive)
+            {
+                _isChangeDetectionActive = false;
+                _changeDetectionTimer?.Change(
+                    Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+            }
             _undoList.Clear();
             _redoList.Clear();
         }
 
-        StartChangeDetection();
+        if (wasActive) StartChangeDetection();
     }
 
     public void Dispose()

@@ -326,7 +326,7 @@ public class UndoRedoManagerTests
         Assert.NotNull(undo1);
         Assert.Equal(1, undo1.Hash);
         Assert.Equal(1, manager.UndoCount);
-        Assert.Equal(2, manager.RedoCount);
+        Assert.Equal(1, manager.RedoCount);
         Assert.True(manager.CanRedo);
 
         client.Hash = undo1.Hash; // simulate caller restoring state-a
@@ -344,8 +344,43 @@ public class UndoRedoManagerTests
         Assert.NotNull(undo2);
         Assert.Equal(1, undo2.Hash);
         Assert.Equal(1, manager.UndoCount);
-        Assert.Equal(2, manager.RedoCount);
+        Assert.Equal(1, manager.RedoCount);
         Assert.True(manager.CanRedo);
+    }
+
+    [Fact]
+    public void UndoRedoCycle_PreservesIntermediateStates_Issue10471()
+    {
+        // Regression for https://github.com/SubtitleEdit/subtitleedit/issues/10471
+        // — undo→redo→undo cycles previously dropped intermediate states from
+        // the undo stack, causing later undos to skip multiple steps.
+        var client = new FakeClient { Hash = 4 };
+        var manager = new UndoRedoManager();
+        manager.SetupChangeDetection(client);
+        manager.Do(MakeItem("s0", 1));
+        manager.Do(MakeItem("s1", 2));
+        manager.Do(MakeItem("s2", 3));
+        manager.Do(MakeItem("s3", 4));
+
+        var u1 = manager.Undo();           // s3 → s2
+        Assert.Equal(3, u1!.Hash);
+        client.Hash = 3;
+
+        var r1 = manager.Redo();           // s2 → s3
+        Assert.Equal(4, r1!.Hash);
+        client.Hash = 4;
+
+        // Each subsequent undo must step back exactly one state.
+        var u2 = manager.Undo();           // s3 → s2
+        Assert.Equal(3, u2!.Hash);
+        client.Hash = 3;
+
+        var u3 = manager.Undo();           // s2 → s1  (was jumping past s1 before fix)
+        Assert.Equal(2, u3!.Hash);
+        client.Hash = 2;
+
+        var u4 = manager.Undo();           // s1 → s0
+        Assert.Equal(1, u4!.Hash);
     }
 
     // -----------------------------------------------------------------------
