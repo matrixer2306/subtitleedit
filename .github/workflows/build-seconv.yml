@@ -12,17 +12,17 @@ on:
           - Release
           - Debug
       create_release:
-        description: 'Create GitHub release'
+        description: 'Upload seconv binaries to the GitHub release (uncheck to only build artifacts)'
         required: true
         default: true
         type: boolean
       is_prerelease:
-        description: 'Mark as pre-release'
+        description: 'Pre-release flag — MUST match the build-ui.yml run for the same tag, otherwise the existing release will be flipped'
         required: true
         default: true
         type: boolean
       release_tag:
-        description: 'Release tag (e.g., v5.0.0-beta21). Seconv assets are uploaded to the existing release for this tag (created by build-ui.yml). If the release does not exist yet, it is created.'
+        description: 'Release tag, same value as build-ui.yml (e.g., v5.0.0-beta21). Seconv assets are added to that release; if it does not exist yet, an empty release is created and build-ui.yml will fill in the title/body when it runs.'
         required: false
         default: ''
         type: string
