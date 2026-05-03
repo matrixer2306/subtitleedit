@@ -459,6 +459,46 @@ public partial class BatchConvertViewModel : ObservableObject
             Se.Settings.Tools.BatchConvert.ChangeCasingType = "AllLowercase";
         }
 
+        Se.Settings.Tools.BatchConvert.NormalCasingFixNames = NormalCasingFixNames;
+        Se.Settings.Tools.BatchConvert.NormalCasingOnlyUpper = NormalCasingOnlyUpper;
+
+        // Offset time codes
+        Se.Settings.Tools.BatchConvert.OffsetTimeCodesMilliseconds = OffsetTimeCodesTime.TotalMilliseconds;
+        Se.Settings.Tools.BatchConvert.OffsetTimeCodesForward = OffsetTimeCodesForward;
+
+        // Change frame rate
+        Se.Settings.Tools.BatchConvert.ChangeFrameRateFrom = SelectedFromFrameRate;
+        Se.Settings.Tools.BatchConvert.ChangeFrameRateTo = SelectedToFrameRate;
+
+        // Change speed
+        Se.Settings.Tools.BatchConvert.ChangeSpeedPercent = ChangeSpeedPercent;
+
+        // Delete lines
+        Se.Settings.Tools.BatchConvert.DeleteXFirstLines = DeleteXFirstLines;
+        Se.Settings.Tools.BatchConvert.DeleteXLastLines = DeleteXLastLines;
+        Se.Settings.Tools.BatchConvert.DeleteLinesContains = DeleteLinesContains ?? string.Empty;
+        Se.Settings.Tools.BatchConvert.DeleteActorsOrStyles = DeleteActorsOrStyles ?? string.Empty;
+
+        // Add formatting
+        Se.Settings.Tools.BatchConvert.FormattingAddItalic = FormattingAddItalic;
+        Se.Settings.Tools.BatchConvert.FormattingAddBold = FormattingAddBold;
+        Se.Settings.Tools.BatchConvert.FormattingAddUnderline = FormattingAddUnderline;
+        Se.Settings.Tools.BatchConvert.FormattingAddAlignmentTag = FormattingAddAlignmentTag;
+        Se.Settings.Tools.BatchConvert.FormattingAddAlignmentTagOption = SelectedAlignmentTagOption?.Code ?? "an2";
+        Se.Settings.Tools.BatchConvert.FormattingAddColor = FormattingAddColor;
+        Se.Settings.Tools.BatchConvert.FormattingAddColorValue = FormattingAddColorValue.ToString();
+
+        // Remove line breaks
+        Se.Settings.Tools.BatchConvert.RemoveLineBreaksOnlyShortLines = RemoveLineBreaksOnlyShortLines;
+
+        // ASSA change resolution
+        Se.Settings.Tools.BatchConvert.AssaChangeResolutionTargetWidth = AssaChangeResolutionTargetWidth;
+        Se.Settings.Tools.BatchConvert.AssaChangeResolutionTargetHeight = AssaChangeResolutionTargetHeight;
+        Se.Settings.Tools.BatchConvert.AssaChangeResolutionChangeMargins = AssaChangeResolutionChangeMargins;
+        Se.Settings.Tools.BatchConvert.AssaChangeResolutionChangeFontSize = AssaChangeResolutionChangeFontSize;
+        Se.Settings.Tools.BatchConvert.AssaChangeResolutionChangePosition = AssaChangeResolutionChangePosition;
+        Se.Settings.Tools.BatchConvert.AssaChangeResolutionChangeDrawing = AssaChangeResolutionChangeDrawing;
+
         // Fix right-to-left
         if (RtlFixViaUniCode)
         {
@@ -579,6 +619,59 @@ public partial class BatchConvertViewModel : ObservableObject
         SplitBreakMaxNumberOfLines = Se.Settings.General.MaxNumberOfLines;
         SplitBreakSplitLongLines = Se.Settings.Tools.SplitRebalanceLongLinesSplit;
         SplitBreakRebalanceLongLines = Se.Settings.Tools.SplitRebalanceLongLinesRebalance;
+
+        // Offset time codes
+        OffsetTimeCodesTime = TimeSpan.FromMilliseconds(Se.Settings.Tools.BatchConvert.OffsetTimeCodesMilliseconds);
+        OffsetTimeCodesForward = Se.Settings.Tools.BatchConvert.OffsetTimeCodesForward;
+        OffsetTimeCodesBack = !OffsetTimeCodesForward;
+
+        // Change frame rate — match against the available list so binding picks up the value.
+        var fromRate = FromFrameRates.FirstOrDefault(p => Math.Abs(p - Se.Settings.Tools.BatchConvert.ChangeFrameRateFrom) < 0.001);
+        if (fromRate > 0)
+        {
+            SelectedFromFrameRate = fromRate;
+        }
+        var toRate = ToFrameRates.FirstOrDefault(p => Math.Abs(p - Se.Settings.Tools.BatchConvert.ChangeFrameRateTo) < 0.001);
+        if (toRate > 0)
+        {
+            SelectedToFrameRate = toRate;
+        }
+
+        // Change speed
+        ChangeSpeedPercent = Se.Settings.Tools.BatchConvert.ChangeSpeedPercent;
+
+        // Delete lines
+        DeleteXFirstLines = Se.Settings.Tools.BatchConvert.DeleteXFirstLines;
+        DeleteXLastLines = Se.Settings.Tools.BatchConvert.DeleteXLastLines;
+        DeleteLinesContains = Se.Settings.Tools.BatchConvert.DeleteLinesContains ?? string.Empty;
+        DeleteActorsOrStyles = Se.Settings.Tools.BatchConvert.DeleteActorsOrStyles ?? string.Empty;
+
+        // Add formatting
+        FormattingAddItalic = Se.Settings.Tools.BatchConvert.FormattingAddItalic;
+        FormattingAddBold = Se.Settings.Tools.BatchConvert.FormattingAddBold;
+        FormattingAddUnderline = Se.Settings.Tools.BatchConvert.FormattingAddUnderline;
+        FormattingAddAlignmentTag = Se.Settings.Tools.BatchConvert.FormattingAddAlignmentTag;
+        var alignment = AlignmentTagOptions.FirstOrDefault(p => p.Code == Se.Settings.Tools.BatchConvert.FormattingAddAlignmentTagOption);
+        if (alignment != null)
+        {
+            SelectedAlignmentTagOption = alignment;
+        }
+        FormattingAddColor = Se.Settings.Tools.BatchConvert.FormattingAddColor;
+        if (Color.TryParse(Se.Settings.Tools.BatchConvert.FormattingAddColorValue, out var color))
+        {
+            FormattingAddColorValue = color;
+        }
+
+        // Remove line breaks
+        RemoveLineBreaksOnlyShortLines = Se.Settings.Tools.BatchConvert.RemoveLineBreaksOnlyShortLines;
+
+        // ASSA change resolution
+        AssaChangeResolutionTargetWidth = Se.Settings.Tools.BatchConvert.AssaChangeResolutionTargetWidth;
+        AssaChangeResolutionTargetHeight = Se.Settings.Tools.BatchConvert.AssaChangeResolutionTargetHeight;
+        AssaChangeResolutionChangeMargins = Se.Settings.Tools.BatchConvert.AssaChangeResolutionChangeMargins;
+        AssaChangeResolutionChangeFontSize = Se.Settings.Tools.BatchConvert.AssaChangeResolutionChangeFontSize;
+        AssaChangeResolutionChangePosition = Se.Settings.Tools.BatchConvert.AssaChangeResolutionChangePosition;
+        AssaChangeResolutionChangeDrawing = Se.Settings.Tools.BatchConvert.AssaChangeResolutionChangeDrawing;
     }
 
     private void UpdateOutputProperties()

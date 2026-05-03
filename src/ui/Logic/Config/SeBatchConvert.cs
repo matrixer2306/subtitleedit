@@ -22,6 +22,16 @@ public class SeBatchConvert
     public bool FormattingRemoveBold { get; set; }
     public bool FormattingRemoveAlignmentTags { get; set; }
 
+    public bool FormattingAddItalic { get; set; }
+    public bool FormattingAddBold { get; set; }
+    public bool FormattingAddUnderline { get; set; }
+    public bool FormattingAddAlignmentTag { get; set; }
+    public string FormattingAddAlignmentTagOption { get; set; }
+    public bool FormattingAddColor { get; set; }
+    public string FormattingAddColorValue { get; set; }
+
+    public bool RemoveLineBreaksOnlyShortLines { get; set; }
+
     public double OffsetTimeCodesMilliseconds { get; set; }
     public bool OffsetTimeCodesForward { get; set; }
 
@@ -34,16 +44,31 @@ public class SeBatchConvert
 
     public double ChangeFrameRateFrom { get; set; }
     public double ChangeFrameRateTo { get; set; }
+
+    public double ChangeSpeedPercent { get; set; }
+
+    public int DeleteXFirstLines { get; set; }
+    public int DeleteXLastLines { get; set; }
+    public string DeleteLinesContains { get; set; }
+    public string DeleteActorsOrStyles { get; set; }
+
+    public int AssaChangeResolutionTargetWidth { get; set; }
+    public int AssaChangeResolutionTargetHeight { get; set; }
+    public bool AssaChangeResolutionChangeMargins { get; set; }
+    public bool AssaChangeResolutionChangeFontSize { get; set; }
+    public bool AssaChangeResolutionChangePosition { get; set; }
+    public bool AssaChangeResolutionChangeDrawing { get; set; }
+
     public bool SaveInSourceFolder { get; set; }
-    
+
     public string AutoTranslateEngine { get; set; }
     public string AutoTranslateSourceLanguage { get; set; }
     public string AutoTranslateTargetLanguage { get; set; }
- 
+
     public string ChangeCasingType { get; set; }
     public bool NormalCasingFixNames { get; set; }
     public bool NormalCasingOnlyUpper { get; set; }
-    
+
     public string FixRtlMode { get; set; }
     public string LastFilterItem { get; set; }
     public string LanguagePostFix { get; set; }
@@ -62,12 +87,23 @@ public class SeBatchConvert
         PaddleLanguage = "en";
         BinaryOcrDatabase = "Latin";
         OffsetTimeCodesForward = true;
-        AdjustVia = "Seconds"; 
+        AdjustVia = "Seconds";
         AdjustDurationSeconds = 0.1;
         AdjustDurationPercentage = 100;
         AdjustDurationFixedMilliseconds = 3000;
         ChangeFrameRateFrom = 23.976;
         ChangeFrameRateTo = 24;
+        ChangeSpeedPercent = 100;
+        DeleteLinesContains = string.Empty;
+        DeleteActorsOrStyles = string.Empty;
+        FormattingAddAlignmentTagOption = "an2";
+        FormattingAddColorValue = "#FFFFFFFF";
+        AssaChangeResolutionTargetWidth = 1920;
+        AssaChangeResolutionTargetHeight = 1080;
+        AssaChangeResolutionChangeMargins = true;
+        AssaChangeResolutionChangeFontSize = true;
+        AssaChangeResolutionChangePosition = true;
+        AssaChangeResolutionChangeDrawing = true;
         AutoTranslateEngine = new OllamaTranslate().Name;
         AutoTranslateSourceLanguage = "auto";
         AutoTranslateTargetLanguage = "en";
