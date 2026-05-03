@@ -21,6 +21,10 @@ v5.0.0-beta21 (xth May 2026)
 * Binary edit - allow import of image subs from mkv
 * Seveal fixes for nOCR + subtitle text import/export
 * Add "/batchconvertui" / "--batchconvertui" command line options to open batch convert UI only
+* Update CrispASR to v0.5.5 + add Granite 4.1 models (base/plus/nar) + add Kyutai STT backend (en/fr)
+* Minor fixes for undo/redo - thx rRobis
+* Fix for speech-to-text encoding UI log
+* Fix remove color from WebVTT - thx wjcarpenter
 
 -----------------------------------------------------------------------------------------------------
 

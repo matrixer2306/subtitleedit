@@ -1,4 +1,4 @@
-﻿using Nikse.SubtitleEdit.Core.AudioToText;
+using Nikse.SubtitleEdit.Core.AudioToText;
 using Nikse.SubtitleEdit.Logic.Config;
 using System.Collections.Generic;
 using System.IO;
@@ -6,13 +6,13 @@ using System.Runtime.InteropServices;
 
 namespace Nikse.SubtitleEdit.Features.Video.SpeechToText.Engines;
 
-public class CrispAsrGranite : CrispAsrEngineBase
+public class CrispAsrKyutai : CrispAsrEngineBase
 {
-    public static string StaticName => "Crisp ASR Granite";
+    public static string StaticName => "Crisp ASR Kyutai";
     public override string Name => StaticName;
-    public override string Choice => WhisperChoice.CrispAsrGranite;
+    public override string Choice => WhisperChoice.CrispAsrKyutai;
     public override string Url => "https://github.com/CrispStrobe/CrispASR";
-    public override string BackendName => "granite";
+    public override string BackendName => "kyutai-stt";
     public override string DefaultLanguage => "en";
     public override bool IncludeLanguage => true;
 
@@ -21,10 +21,6 @@ public class CrispAsrGranite : CrispAsrEngineBase
         {
             new WhisperLanguage("en", "english"),
             new WhisperLanguage("fr", "french"),
-            new WhisperLanguage("de", "german"),
-            new WhisperLanguage("es", "spanish"),
-            new WhisperLanguage("pt", "portuguese"),
-            new WhisperLanguage("ja", "japanese"),
         };
 
     public override List<WhisperModel> Models =>
@@ -32,65 +28,29 @@ public class CrispAsrGranite : CrispAsrEngineBase
        {
             new WhisperModel
             {
-                Name = "granite-speech-4.0-1b-q4_k.gguf",
-                Size = "2.94 GB",
+                Name = "kyutai-stt-1b-q4_k.gguf",
+                Size = "0.67 GB",
                 Urls =
                 [
-                    "https://huggingface.co/cstr/granite-speech-4.0-1b-GGUF/resolve/main/granite-speech-4.0-1b-q4_k.gguf"
+                    "https://huggingface.co/cstr/kyutai-stt-1b-GGUF/resolve/main/kyutai-stt-1b-q4_k.gguf"
                 ],
             },
             new WhisperModel
             {
-                Name = "granite-speech-4.0-1b-q5_0.gguf",
-                Size = "3.17 GB",
+                Name = "kyutai-stt-1b-q8_0.gguf",
+                Size = "1.17 GB",
                 Urls =
                 [
-                    "https://huggingface.co/cstr/granite-speech-4.0-1b-GGUF/resolve/main/granite-speech-4.0-1b-q5_0.gguf"
+                    "https://huggingface.co/cstr/kyutai-stt-1b-GGUF/resolve/main/kyutai-stt-1b-q8_0.gguf"
                 ],
             },
             new WhisperModel
             {
-                Name = "granite-speech-4.0-1b-q8_0.gguf",
-                Size = "3.86 GB",
+                Name = "kyutai-stt-1b.gguf",
+                Size = "2.12 GB",
                 Urls =
                 [
-                    "https://huggingface.co/cstr/granite-speech-4.0-1b-GGUF/resolve/main/granite-speech-4.0-1b-q8_0.gguf"
-                ],
-            },
-            new WhisperModel
-            {
-                Name = "granite-speech-4.0-1b-f16.gguf",
-                Size = "5.58 GB",
-                Urls =
-                [
-                    "https://huggingface.co/cstr/granite-speech-4.0-1b-GGUF/resolve/main/granite-speech-4.0-1b-f16.gguf"
-                ],
-            },
-            new WhisperModel
-            {
-                Name = "granite-speech-4.1-2b-q4_k.gguf",
-                Size = "2.94 GB",
-                Urls =
-                [
-                    "https://huggingface.co/cstr/granite-speech-4.1-2b-GGUF/resolve/main/granite-speech-4.1-2b-q4_k.gguf"
-                ],
-            },
-            new WhisperModel
-            {
-                Name = "granite-speech-4.1-2b-plus-q4_k.gguf",
-                Size = "2.96 GB",
-                Urls =
-                [
-                    "https://huggingface.co/cstr/granite-speech-4.1-2b-plus-GGUF/resolve/main/granite-speech-4.1-2b-plus-q4_k.gguf"
-                ],
-            },
-            new WhisperModel
-            {
-                Name = "granite-speech-4.1-2b-nar-q4_k.gguf",
-                Size = "3.41 GB",
-                Urls =
-                [
-                    "https://huggingface.co/cstr/granite-speech-4.1-2b-nar-GGUF/resolve/main/granite-speech-4.1-2b-nar-q4_k.gguf"
+                    "https://huggingface.co/cstr/kyutai-stt-1b-GGUF/resolve/main/kyutai-stt-1b.gguf"
                 ],
             },
        };
@@ -187,7 +147,7 @@ public class CrispAsrGranite : CrispAsrEngineBase
 
     public override string CommandLineParameter
     {
-        get => Se.Settings.Tools.AudioToText.CommandLineParameterCrispAsrGranite;
-        set => Se.Settings.Tools.AudioToText.CommandLineParameterCrispAsrGranite = value;
+        get => Se.Settings.Tools.AudioToText.CommandLineParameterCrispAsrKyutai;
+        set => Se.Settings.Tools.AudioToText.CommandLineParameterCrispAsrKyutai = value;
     }
 }

@@ -51,6 +51,7 @@ public class SeAudioToText
     public string CommandLineParameterCrispAsrParakeet { get; set; } = "--max-len 50 --split-on-punct";
     public string CommandLineParameterCrispAsrQwen3 { get; set; } = "--max-len 50 --split-on-punct";
     public string CommandLineParameterCrispAsrOmni { get; set; } = "--max-len 50 --split-on-punct";
+    public string CommandLineParameterCrispAsrKyutai { get; set; } = "--max-len 50 --split-on-punct";
 
     public string WhisperExtraSettingsHistory { get; set; } = string.Empty;
 

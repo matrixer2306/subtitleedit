@@ -28,6 +28,7 @@ public class CrispAsrEngine : CrispAsrEngineBase
             new CrispAsrGranite(),
             new CrispAsrQwen3(),
             new CrispAsrOmni(),
+            new CrispAsrKyutai(),
         };
 
         SelectedBackend = _backends[0];
