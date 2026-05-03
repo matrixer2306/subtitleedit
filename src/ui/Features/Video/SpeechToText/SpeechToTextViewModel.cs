@@ -616,6 +616,7 @@ public partial class SpeechToTextViewModel : ObservableObject
         if (dataReceivedHandler != null)
         {
             p.StartInfo.StandardOutputEncoding = Encoding.UTF8;
+            p.StartInfo.StandardErrorEncoding = Encoding.UTF8;
             p.StartInfo.UseShellExecute = false;
             p.StartInfo.RedirectStandardOutput = true;
             p.StartInfo.RedirectStandardError = true;
@@ -2155,6 +2156,7 @@ public partial class SpeechToTextViewModel : ObservableObject
             if (dataReceivedHandler != null)
             {
                 p.StartInfo.StandardOutputEncoding = Encoding.UTF8;
+                p.StartInfo.StandardErrorEncoding = Encoding.UTF8;
                 p.StartInfo.UseShellExecute = false;
                 p.StartInfo.RedirectStandardOutput = true;
                 p.StartInfo.RedirectStandardError = true;
@@ -2200,6 +2202,7 @@ public partial class SpeechToTextViewModel : ObservableObject
             if (dataReceivedHandler != null)
             {
                 p.StartInfo.StandardOutputEncoding = Encoding.UTF8;
+                p.StartInfo.StandardErrorEncoding = Encoding.UTF8;
                 p.StartInfo.UseShellExecute = false;
                 p.StartInfo.RedirectStandardOutput = true;
                 p.StartInfo.RedirectStandardError = true;
@@ -2275,6 +2278,7 @@ public partial class SpeechToTextViewModel : ObservableObject
             if (dataReceivedHandler != null)
             {
                 p.StartInfo.StandardOutputEncoding = Encoding.UTF8;
+                p.StartInfo.StandardErrorEncoding = Encoding.UTF8;
                 p.StartInfo.UseShellExecute = false;
                 p.StartInfo.RedirectStandardOutput = true;
                 p.StartInfo.RedirectStandardError = true;
@@ -2408,6 +2412,7 @@ public partial class SpeechToTextViewModel : ObservableObject
         if (dataReceivedHandler != null)
         {
             process.StartInfo.StandardOutputEncoding = Encoding.UTF8;
+            process.StartInfo.StandardErrorEncoding = Encoding.UTF8;
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
