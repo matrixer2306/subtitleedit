@@ -45,4 +45,51 @@ public class WebVttHelperTest
 
         Assert.Equal("<c.Italic>Red</c>", result);
     }
+
+    [Fact]
+    public void RemoveColorTagMultiline()
+    {
+        var styles = new List<WebVttStyle>
+        {
+            new WebVttStyle
+            {
+                Name = ".yellow",
+                Color = SKColors.Yellow,
+            },
+        };
+
+        var text = "<c.yellow>-Qu'est-ce qu'on a ?</c>" + Environment.NewLine + "<c.yellow>-Adrien Dorval, 65 ans.</c>";
+        var result = WebVttHelper.RemoveColorTag(text, SKColors.Yellow, styles);
+
+        var expected = "-Qu'est-ce qu'on a ?" + Environment.NewLine + "-Adrien Dorval, 65 ans.";
+        Assert.Equal(expected, result);
+    }
+
+    [Fact]
+    public void RemoveDefaultColorClassesMultiline()
+    {
+        var text = "<c.yellow>-Qu'est-ce qu'on a ?</c>" + Environment.NewLine + "<c.yellow>-Adrien Dorval, 65 ans.</c>";
+        var result = WebVttHelper.RemoveDefaultColorClasses(text);
+
+        var expected = "-Qu'est-ce qu'on a ?" + Environment.NewLine + "-Adrien Dorval, 65 ans.";
+        Assert.Equal(expected, result);
+    }
+
+    [Fact]
+    public void RemoveDefaultColorClassesPreservesUnknownClasses()
+    {
+        var text = "<c.yellow.bold>Hi</c>";
+        var result = WebVttHelper.RemoveDefaultColorClasses(text);
+
+        Assert.Equal("<c.bold>Hi</c>", result);
+    }
+
+    [Fact]
+    public void RemoveDefaultColorClassesNoChange()
+    {
+        var text = "Plain text";
+        var result = WebVttHelper.RemoveDefaultColorClasses(text);
+
+        Assert.Equal("Plain text", result);
+    }
 }

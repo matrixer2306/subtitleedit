@@ -49,6 +49,8 @@ public class ColorService : IColorService
                 }
             }
 
+            p.Text = WebVttHelper.RemoveDefaultColorClasses(p.Text);
+
             return;
         }
 

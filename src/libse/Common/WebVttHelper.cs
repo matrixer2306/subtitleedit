@@ -424,17 +424,53 @@ namespace Nikse.SubtitleEdit.Core.Common
             text = text.Replace("." + style.Name.TrimStart('.') + ".", ".");
             text = text.Replace("." + style.Name.TrimStart('.') + ">", ">");
 
-            var idx = text.IndexOf("<c>", StringComparison.Ordinal);
-            if (idx >= 0)
+            return RemoveEmptyClassWrappers(text);
+        }
+
+        // WebVTT predefined color cue classes (https://www.w3.org/TR/webvtt1/#default-classes).
+        // These render as colors in browsers without needing a STYLE block, so "remove color"
+        // should strip them even when the header has no matching ::cue style.
+        private static readonly string[] DefaultColorClasses =
+        {
+            "white", "lime", "cyan", "red", "yellow", "magenta", "blue", "black",
+            "bg_white", "bg_lime", "bg_cyan", "bg_red", "bg_yellow", "bg_magenta", "bg_blue", "bg_black",
+        };
+
+        public static string RemoveDefaultColorClasses(string input)
+        {
+            if (string.IsNullOrEmpty(input) || input.IndexOf("<c", StringComparison.Ordinal) < 0)
             {
-                var endIdx = text.IndexOf("</c>", idx);
-                if (endIdx > 0)
-                {
-                    text = text.Remove(endIdx, 4);
-                    text = text.Remove(idx, 3);
-                }
+                return input;
             }
 
+            var text = input;
+            foreach (var name in DefaultColorClasses)
+            {
+                text = text.Replace("." + name + ".", ".");
+                text = text.Replace("." + name + ">", ">");
+            }
+
+            return RemoveEmptyClassWrappers(text);
+        }
+
+        private static string RemoveEmptyClassWrappers(string input)
+        {
+            var text = input;
+            while (true)
+            {
+                var idx = text.IndexOf("<c>", StringComparison.Ordinal);
+                if (idx < 0)
+                {
+                    break;
+                }
+                var endIdx = text.IndexOf("</c>", idx, StringComparison.Ordinal);
+                if (endIdx < 0)
+                {
+                    break;
+                }
+                text = text.Remove(endIdx, 4);
+                text = text.Remove(idx, 3);
+            }
             return text;
         }
 

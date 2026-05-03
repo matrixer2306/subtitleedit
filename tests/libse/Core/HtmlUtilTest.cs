@@ -61,6 +61,22 @@ public class HtmlUtilTest
     }
 
     [Fact]
+    public void RemoveHtmlTagsWebVttCMultiline()
+    {
+        var source = "<c.yellow>-Qu'est-ce qu'on a ?</c>" + Environment.NewLine + "<c.yellow>-Adrien Dorval, 65 ans.</c>";
+        var expected = "-Qu'est-ce qu'on a ?" + Environment.NewLine + "-Adrien Dorval, 65 ans.";
+        Assert.Equal(expected, HtmlUtil.RemoveHtmlTags(source, true));
+    }
+
+    [Fact]
+    public void RemoveHtmlTagsWebVttVMultiline()
+    {
+        var source = "<v Roger>Hi</v>" + Environment.NewLine + "<v.loud Bob>Bye</v>";
+        var expected = "Hi" + Environment.NewLine + "Bye";
+        Assert.Equal(expected, HtmlUtil.RemoveHtmlTags(source, true));
+    }
+
+    [Fact]
     public void FixInvalidItalicTags1()
     {
         const string s = "<i>foobar<i>?";

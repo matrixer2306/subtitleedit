@@ -111,6 +111,22 @@ public class ColorServiceTests
     }
 
     [Fact]
+    public void RemoveColorTags_WebVtt_StripsDefaultColorClassOnMultipleLinesWithoutHeaderStyle()
+    {
+        var service = new ColorService();
+        var subtitle = new Subtitle();
+        var format = new WebVTT();
+
+        var text = "<c.yellow>-Qu'est-ce qu'on a ?</c>" + Environment.NewLine + "<c.yellow>-Adrien Dorval, 65 ans.</c>";
+        var line = Line(text);
+
+        service.RemoveColorTags(new List<SubtitleLineViewModel> { line }, subtitle, format);
+
+        var expected = "-Qu'est-ce qu'on a ?" + Environment.NewLine + "-Adrien Dorval, 65 ans.";
+        Assert.Equal(expected, line.Text);
+    }
+
+    [Fact]
     public void RemoveColorTags_Srt_StripsFontColorTags()
     {
         var service = new ColorService();

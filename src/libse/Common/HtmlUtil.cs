@@ -420,32 +420,42 @@ namespace Nikse.SubtitleEdit.Core.Common
             }
 
             // v tag from WebVTT
-            var indexOfVTag = s.IndexOf("<v ", StringComparison.Ordinal);
-            if (indexOfVTag < 0)
+            while (true)
             {
-                indexOfVTag = s.IndexOf("<v.", StringComparison.Ordinal);
-            }
-            if (indexOfVTag >= 0)
-            {
+                var indexOfVTag = s.IndexOf("<v ", StringComparison.Ordinal);
+                if (indexOfVTag < 0)
+                {
+                    indexOfVTag = s.IndexOf("<v.", StringComparison.Ordinal);
+                }
+                if (indexOfVTag < 0)
+                {
+                    break;
+                }
                 var indexOfEndVTag = s.IndexOf('>', indexOfVTag);
-                if (indexOfEndVTag >= 0)
+                if (indexOfEndVTag < 0)
                 {
-                    s = s.Remove(indexOfVTag, indexOfEndVTag - indexOfVTag + 1);
-                    s = s.Replace("</v>", string.Empty);
+                    break;
                 }
+                s = s.Remove(indexOfVTag, indexOfEndVTag - indexOfVTag + 1);
             }
+            s = s.Replace("</v>", string.Empty);
 
-            // v tag from WebVTT
-            var indexOfCTag = s.IndexOf("<c.", StringComparison.Ordinal);
-            if (indexOfCTag >= 0)
+            // c tag from WebVTT
+            while (true)
             {
-                var indexOfEndVTag = s.IndexOf('>', indexOfCTag);
-                if (indexOfEndVTag >= 0)
+                var indexOfCTag = s.IndexOf("<c.", StringComparison.Ordinal);
+                if (indexOfCTag < 0)
                 {
-                    s = s.Remove(indexOfCTag, indexOfEndVTag - indexOfCTag + 1);
-                    s = s.Replace("</c>", string.Empty);
+                    break;
                 }
+                var indexOfEndCTag = s.IndexOf('>', indexOfCTag);
+                if (indexOfEndCTag < 0)
+                {
+                    break;
+                }
+                s = s.Remove(indexOfCTag, indexOfEndCTag - indexOfCTag + 1);
             }
+            s = s.Replace("</c>", string.Empty);
 
             return RemoveCommonHtmlTags(s);
         }
