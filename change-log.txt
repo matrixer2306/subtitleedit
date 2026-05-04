@@ -2,6 +2,23 @@
 Subtitle Edit Changelog
 
 
+v5.0.0-beta22 (xth May 2026)
+
+* Update Italian translation - thx bovirus
+* Update CrispASR to v0.5.7
+* Add "Close translantion" file menu item - thx emwgee
+* Add NVIDIA API for autotranslate - thx subof 
+* Fix for Piper Linux espeak symlink - thx Ironship
+* Handle original subtitle save failures better - thx Ironship
+* Fix crash when using "Generate video with subtitles" - thx AndroidTS007
+* Fix remove color from WebVTT - thx wjcarpenter 
+* Add more functions to batch-convert
+* Update Polish translation - thx potplayer-fanpack
+* Fix crash for binary ocr in batch-convert 
+* Fix download/unpack title - thx sam12345 
+
+-----------------------------------------------------------------------------------------------------
+
 v5.0.0-beta21 (3rd May 2026)
 
 * Update Simplified Chinese localization - thx Monstercate
