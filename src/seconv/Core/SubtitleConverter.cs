@@ -229,7 +229,7 @@ internal class SubtitleConverter
 
         if (options.Operations.Count > 0)
         {
-            LibSEIntegration.ApplyOperations(subtitle, options.Operations);
+            LibSEIntegration.ApplyOperations(subtitle, options.Operations, options.FixCommonErrorsRules);
         }
 
         if (!string.IsNullOrWhiteSpace(options.MultipleReplaceFile))
@@ -328,6 +328,12 @@ internal class ConversionOptions
     public double? TargetFps { get; init; }
     public bool Overwrite { get; init; }
     public List<string> Operations { get; init; } = new();
+
+    /// <summary>
+    /// Optional FixCommonErrors rule selection. Empty/null = run all rules.
+    /// Resolve via <see cref="FixCommonErrorsRunner.ResolveRuleIds"/>.
+    /// </summary>
+    public IReadOnlyList<string> FixCommonErrorsRules { get; init; } = [];
     public int? DeleteFirst { get; init; }
     public int? DeleteLast { get; init; }
     public string? DeleteContains { get; init; }

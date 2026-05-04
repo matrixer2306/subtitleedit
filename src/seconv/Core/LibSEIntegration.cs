@@ -313,9 +313,14 @@ internal static class LibSEIntegration
     }
 
     /// <summary>
-    /// Applies subtitle operations/transformations
+    /// Applies subtitle operations/transformations. <paramref name="fixCommonErrorsRules"/>
+    /// is consulted only when <c>fixcommonerrors</c> is in the operation list — pass
+    /// <c>null</c> or empty to run all FCE rules.
     /// </summary>
-    public static void ApplyOperations(Subtitle subtitle, List<string> operations)
+    public static void ApplyOperations(
+        Subtitle subtitle,
+        List<string> operations,
+        IReadOnlyList<string>? fixCommonErrorsRules = null)
     {
         if (subtitle == null || operations == null || operations.Count == 0)
         {
@@ -324,16 +329,19 @@ internal static class LibSEIntegration
 
         foreach (var operation in operations)
         {
-            ApplyOperation(subtitle, operation);
+            ApplyOperation(subtitle, operation, fixCommonErrorsRules);
         }
     }
 
-    private static void ApplyOperation(Subtitle subtitle, string operation)
+    private static void ApplyOperation(
+        Subtitle subtitle,
+        string operation,
+        IReadOnlyList<string>? fixCommonErrorsRules)
     {
         switch (operation.ToLowerInvariant())
         {
             case "fixcommonerrors":
-                // TODO: Use FixCommonErrors class from LibSE
+                FixCommonErrorsRunner.Run(subtitle, fixCommonErrorsRules);
                 break;
 
             case "removetextforhi":

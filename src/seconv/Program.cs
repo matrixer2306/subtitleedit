@@ -55,6 +55,11 @@ internal class Program
                 ListHelpers.PrintOcrEngines();
                 return 0;
             }
+            if (first.Equals("list-fce-rules", StringComparison.OrdinalIgnoreCase))
+            {
+                ListHelpers.PrintFixCommonErrorsRules();
+                return 0;
+            }
         }
 
         // Set up Spectre.Console CLI with default command
@@ -153,6 +158,7 @@ internal class Program
         "--DeleteFirst",
         "--DeleteLast",
         "--DeleteContains",
+        "--FixCommonErrorsRules",
         "--settings",
         "--ocrlanguage",
         "--ocrdb",

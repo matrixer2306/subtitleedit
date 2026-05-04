@@ -167,6 +167,10 @@ internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         [Description("Fix common errors")]
         public bool FixCommonErrors { get; init; }
 
+        [CommandOption("--FixCommonErrorsRules")]
+        [Description("Comma-separated FCE rule IDs (or 'all,-RuleId' to subtract). See: seconv list-fce-rules")]
+        public string? FixCommonErrorsRules { get; init; }
+
         [CommandOption("--FixRtlViaUnicodeChars")]
         [Description("Fix RTL via Unicode characters")]
         public bool FixRtlViaUnicodeChars { get; init; }
@@ -266,13 +270,30 @@ internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
                 return 1;
             }
 
+            // Resolve FCE rule selection. Passing --FixCommonErrorsRules implicitly
+            // enables --FixCommonErrors so users don't have to specify both.
+            IReadOnlyList<string> fceRules = [];
+            var fceRequested = settings.FixCommonErrors || !string.IsNullOrWhiteSpace(settings.FixCommonErrorsRules);
+            if (fceRequested)
+            {
+                try
+                {
+                    fceRules = FixCommonErrorsRunner.ResolveRuleIds(settings.FixCommonErrorsRules);
+                }
+                catch (ArgumentException ex)
+                {
+                    AnsiConsole.MarkupLine($"[red]Error: {ex.Message.EscapeMarkup()}[/]");
+                    return 1;
+                }
+            }
+
             // Build operations list
             var operations = new List<string>();
             if (settings.ApplyDurationLimits) operations.Add("ApplyDurationLimits");
             if (settings.BalanceLines) operations.Add("BalanceLines");
             if (settings.BeautifyTimeCodes) operations.Add("BeautifyTimeCodes");
             if (settings.ConvertColorsToDialog) operations.Add("ConvertColorsToDialog");
-            if (settings.FixCommonErrors) operations.Add("FixCommonErrors");
+            if (fceRequested) operations.Add("FixCommonErrors");
             if (settings.FixRtlViaUnicodeChars) operations.Add("FixRtlViaUnicodeChars");
             if (settings.MergeSameTexts) operations.Add("MergeSameTexts");
             if (settings.MergeSameTimeCodes) operations.Add("MergeSameTimeCodes");
@@ -343,6 +364,7 @@ internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
                 TargetFps = settings.TargetFps,
                 Overwrite = settings.Overwrite,
                 Operations = operations,
+                FixCommonErrorsRules = fceRules,
                 DeleteFirst = settings.DeleteFirst,
                 DeleteLast = settings.DeleteLast,
                 DeleteContains = settings.DeleteContains,

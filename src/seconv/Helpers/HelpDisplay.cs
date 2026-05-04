@@ -60,7 +60,8 @@ internal static class HelpDisplay
         ShowParameter("--DeleteFirst:<count>", "Delete first N entries");
         ShowParameter("--DeleteLast:<count>", "Delete last N entries");
         ShowParameter("--DeleteContains:<word>", "Delete entries containing specified word");
-        ShowParameter("--FixCommonErrors", "Fix common subtitle errors");
+        ShowParameter("--FixCommonErrors", "Fix common subtitle errors (all rules)");
+        ShowParameter("--FixCommonErrorsRules:<list>", "FCE rule IDs (csv); supports 'all,-RuleId'. List: seconv list-fce-rules");
         ShowParameter("--FixRtlViaUnicodeChars", "Fix RTL via Unicode characters");
         ShowParameter("--MergeSameTexts", "Merge entries with same text");
         ShowParameter("--MergeSameTimeCodes", "Merge entries with same time codes");
@@ -79,6 +80,7 @@ internal static class HelpDisplay
         ShowParameter("list-encodings", "List all supported text encodings (code page + name)");
         ShowParameter("list-pac-codepages", "List PAC code pages (--pac-codepage values)");
         ShowParameter("list-ocr-engines", "List OCR engines + installation status");
+        ShowParameter("list-fce-rules", "List FixCommonErrors rule IDs");
 
         AnsiConsole.WriteLine();
         ShowSection("Examples", null);

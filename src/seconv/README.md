@@ -59,6 +59,7 @@ seconv formats                # list all supported formats
 seconv list-encodings         # list text encodings
 seconv list-pac-codepages     # list PAC code pages
 seconv list-ocr-engines       # list OCR engines + installation status
+seconv list-fce-rules         # list FixCommonErrors rule IDs
 seconv --help                 # show help
 ```
 
@@ -138,6 +139,21 @@ Applied in a fixed, sensible order regardless of CLI order:
 `--FixRtlViaUnicodeChars` `--MergeSameTexts` `--MergeSameTimeCodes` `--MergeShortLines`
 `--RedoCasing` `--RemoveFormatting` `--RemoveLineBreaks` `--RemoveTextForHI`
 `--RemoveUnicodeControlChars` `--ReverseRtlStartEnd` `--SplitLongLines`
+
+### FixCommonErrors rule selection
+
+`--FixCommonErrors` (no value) runs all 38 rules. Pass `--FixCommonErrorsRules:<list>`
+to pick a subset — supplying the option implies `--FixCommonErrors`.
+
+```bash
+seconv movie.srt subrip --FixCommonErrors                              # all rules
+seconv movie.srt subrip --FixCommonErrorsRules:FixCommas,FixMissingSpaces
+seconv movie.srt subrip --FixCommonErrorsRules:all,-FixDanishLetterI   # all except one
+seconv list-fce-rules                                                  # show rule IDs
+```
+
+`FixCommonOcrErrors` is intentionally excluded — it requires UI-side spell-check
+and OCR engine setup that seconv doesn't carry.
 
 ## Output format aliases
 

@@ -69,6 +69,26 @@ internal static class ListHelpers
         AnsiConsole.Write(table);
     }
 
+    public static void PrintFixCommonErrorsRules()
+    {
+        AnsiConsole.MarkupLine("[bold cyan]FixCommonErrors rule IDs (pass via --FixCommonErrorsRules)[/]");
+        AnsiConsole.WriteLine();
+        var table = new Table().Border(TableBorder.Rounded);
+        table.AddColumn("[yellow]Rule ID[/]");
+
+        foreach (var id in FixCommonErrorsRunner.AvailableRuleIds)
+        {
+            table.AddRow($"[green]{id}[/]");
+        }
+
+        AnsiConsole.Write(table);
+        AnsiConsole.MarkupLine(
+            "\n[dim]Examples:[/]\n" +
+            "  [dim]--FixCommonErrors[/]                                       [dim]# all rules[/]\n" +
+            "  [dim]--FixCommonErrorsRules:FixCommas,FixEllipsesStart[/]       [dim]# only these two[/]\n" +
+            "  [dim]--FixCommonErrorsRules:all,-FixDanishLetterI[/]            [dim]# all except one[/]");
+    }
+
     public static void PrintOcrEngines()
     {
         AnsiConsole.MarkupLine("[bold cyan]OCR engines (pass via --ocrengine)[/]");
